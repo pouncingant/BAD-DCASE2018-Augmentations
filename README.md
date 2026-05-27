@@ -16,11 +16,21 @@ ffmpeg -i "{src_file}" -vn -ac 1 -ar 32000 -ab 72k -acodec libvorbis -f ogg "{ds
 2. [Freefield](https://www.kaggle.com/datasets/tatamikenn/freefield1010)
 3. [Warblrb](https://www.kaggle.com/datasets/tatamikenn/warblrb10k) 
 
-
+Information on each dataset can be found at each of the links above, as well as the original competition website: [DCASE 2018 bird audio detection (BAD) competition](https://dcase.community/challenge2018/task-bird-audio-detection)
 
 # Project structure
 
 1. Data loading
+
+The datasets are all arranged similarly (initially inspected using Pandas), with an audio folder containing all of the ogg files for that dataset as well as a single csv in the root directory of each dataset with two columns 1. the name of each audio file and 2. whether the audio file contains (1) or does not contain (0) bird vocalizations.
+
+Due to the memory restrictions of Kaggle, I opted to generate spectrograms when grabbing items for each batch the model loads, rather than keep the spectrograms for the whole dataset in memory. This has the disadvantage of being very slow, and one major optimization would be to 1) create a secondary dataset containing the spectrograms for each audio file, and/or 2) use data reduction techniques (such as Mel spectrums) to potentially enable more efficient use of memory. It is worth noting that this inefficiency impacts all downstream processes, so I would recommend anyone repeating this process to implement the above optimizations, thereby affording more time for the hyperparameter search and training in general.
+
+For simplicity, two augmentations (time axis flipping and per-channel energy normalization (PCEN)) are implemented during data loading; however, these are mentioned later.
+
+
+
+
 2. Model definition
 3. Augmentation
 4. Training loop
