@@ -66,16 +66,22 @@ After finalizing the model, its performance on the 3-way cross validation was an
 
 a. time axis flipping
 - A simple flip along the time axis
+
 b. per-channel energy normalization (PCEN)
 - Normalization of energy across each frequency
+
 c. frequency masking
 - Takes a random band of a random width (0.05 to 0.25% of the entire frequency axis) on the frequency dimension, and suppresses deviations from the mean by a given strength parameter.
+
 d. time masking
 - Takes a random band of a random width (0.05 to 0.25% of the entire time axis) on the time dimension, and suppresses deviations from the mean by a given strength parameter.
+
 e. mixup
 - Merges two spectrograms from the same batch, using the following rules. 1) if both samples are negative, result applies a random lambda. 2) if one is positive, the lambda for the positive spectrogram is no lower than 0.8 and the label is set to 1 ("hasbird"), 3) if both are positive, lambda is set to 1, and the second spectrogram is ignored. The rationale is 1) if there is no bird, a randomly merged noise profile may result in a useful non-bird call environment-like noise profile that the model can learn to ignore, 2) and 3) bird calls may get obscured by the noise profile of the paired spectrogram, and it may be unreasonable for a model to ascertain the presence of the bird call, so we should either heavily bias the positive spectrogram, or ignore the other entirely if both are positive.
+
 f. white noise
 - Applies a given strength of white noise to the spectrogram
+
 
 ___Augmented vROCAUC 0.728___
 
