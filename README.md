@@ -85,7 +85,10 @@ f. white noise
 
 ___Augmented vROCAUC 0.728___
 
-4. Training loop
+4. Training
+
+The training loop includes the above augmentations, except a and b and calculates the probability of a bird being present in the audio by passing the model output to a sigmoid function. This is then used to calculate the training loss using the PyTorch binary cross entropy loss with logits. Nominally, an accuracy metric is defined that constrains the model's answer to 0 or 1 based on a threshold of 0.5; however, in practice, since this model was designed for direct comparison with the DCASE 2018 BAD competition, which evaluates models on their ROCAUC score, this accuracy metric is unused. Nonetheless, if a user desired to use the model in practice they could set the threshold to an appropriate value to maximize accuracy on the validation set.
+
 5. Hyperparameter tuning
 6. Production run
 7. Analysis
