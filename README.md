@@ -31,6 +31,8 @@ The overall procedure for loading data is:
 
 Due to the memory and working directory restrictions of Kaggle, I opted to generate spectrograms when grabbing items for each batch the model loads, rather than keep the spectrograms for the whole dataset in memory. This has the disadvantage of being very slow, and one major optimization would be to 1) create a secondary dataset containing the spectrograms for each audio file, and/or 2) use data reduction techniques (such as Mel spectrums) to potentially enable more efficient use of memory. It is worth noting that this inefficiency impacts all downstream processes, so I would recommend anyone repeating this process to implement the above optimizations, thereby affording more time for the hyperparameter search and training in general.
 
+Since the samples are of different lengths, after calculating the spectrograms, these were padded to a fixed length.
+
 For simplicity, two augmentations (time axis flipping and per-channel energy normalization (PCEN)) are implemented during data loading; however, these are mentioned later in 3. Augmentation.
 
 2. Model definition
@@ -82,6 +84,8 @@ e. mixup
 f. white noise
 - Applies a given strength of white noise to the spectrogram
 
+g. Others
+Although not implemented in this work, future work might investigate whether shifting the signal on the time or frequency axes improves results, as was used in the BulBul model; however, intuitively, since the present model includes a stage of adaptive max pooling that collapses the entire spectrogram on both frequency and time axes down to a single signal for each channel, it is expected that the model is not sensitive to where a signal appears in the spectrogram. (In the BulBul model, this augmentation is reasonable as, rather than collapse the frequency and time axes completely, it collapsed them into 16 channels of 11x8 before passing all of this to a dense layer, which provides more scope for the final result gaining preference for vocalizations at specific times)
 
 ___Augmented vROCAUC 0.728___
 
@@ -89,7 +93,14 @@ ___Augmented vROCAUC 0.728___
 
 The training loop includes the above augmentations, except a and b and calculates the probability of a bird being present in the audio by passing the model output to a sigmoid function. This is then used to calculate the training loss using the PyTorch binary cross entropy loss with logits. Nominally, an accuracy metric is defined that constrains the model's answer to 0 or 1 based on a threshold of 0.5; however, in practice, since this model was designed for direct comparison with the DCASE 2018 BAD competition, which evaluates models on their ROCAUC score, this accuracy metric is unused. Nonetheless, if a user desired to use the model in practice they could set the threshold to an appropriate value to maximize accuracy on the validation set.
 
+Gradients are calculated using steepest gradients descent with momentum including the ADAM update rule.
+
+In addition to regularization using augmentations described in the previous section, dropout was used after each convolution block. 
+
 5. Hyperparameter tuning
+
+In addition to the learning rate and weight decay, the probability of dropout at each convolution block, the probability of each augmentation and strength of each augmentation were parameterized using Optuna.
+
 6. Production run
 7. Analysis
 
